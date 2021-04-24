@@ -114,13 +114,21 @@ const albBackend = new gcp.compute.URLMap(`${config.generalPrefix}-alb-backend`,
     ]
 });
 
+if (config.albHttpRoute) {
+    const httpProxyBackend = new gcp.compute.TargetHttpProxy(`${config.generalPrefix}-alb-backend-proxy-http`, {
+        urlMap: albBackend.selfLink,
+    });
+
+    new gcp.compute.GlobalForwardingRule(`${config.generalPrefix}-alb-backend-forward-http`, {
+        target: httpProxyBackend.selfLink,
+        ipAddress: externalIpBackend.address,
+        portRange: "80",
+    });
+}
+
 const sslPolicyFrontend = new gcp.compute.SSLPolicy(`${config.generalPrefix}-alb-backend-https-policy`, {
     minTlsVersion: 'TLS_1_2',
     profile: 'COMPATIBLE'
-});
-
-const httpProxyBackend = new gcp.compute.TargetHttpProxy(`${config.generalPrefix}-alb-backend-proxy-http`, {
-    urlMap: albBackend.selfLink,
 });
 
 const httpsProxyBackend = new gcp.compute.TargetHttpsProxy(`${config.generalPrefix}-alb-backend-proxy-https`, {
@@ -129,12 +137,6 @@ const httpsProxyBackend = new gcp.compute.TargetHttpsProxy(`${config.generalPref
     sslCertificates: [
         certificates[config.targetDomain].id,
     ],
-});
-
-new gcp.compute.GlobalForwardingRule(`${config.generalPrefix}-alb-backend-forward-http`, {
-    target: httpProxyBackend.selfLink,
-    ipAddress: externalIpBackend.address,
-    portRange: "80",
 });
 
 new gcp.compute.GlobalForwardingRule(`${config.generalPrefix}-alb-backend-forward-https`, {

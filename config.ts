@@ -22,3 +22,4 @@ export const vpcNetwork = configPulumi.get("vpcNetwork");
 export const vpcConnectorRange = configPulumi.get("vpcConnectorRange");
 
 export const slsServiceName = configPulumi.get("slsServiceName");
+export const albHttpRoute = configPulumi.getBoolean("albHttpRoute");
