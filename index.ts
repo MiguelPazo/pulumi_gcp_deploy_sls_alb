@@ -78,6 +78,14 @@ for (let slsFunction of slsConfigs.resources) {
                 group: networkRegionEndpoint.selfLink,
             },
         ],
+        customResponseHeaders: [
+            'X-Frame-Options: DENY',
+            'X-XSS-Protection: 1; mode=block',
+            "Content-Security-Policy: frame-ancestors 'self'",
+            'Strict-Transport-Security: max-age=31536000; includesubdomains',
+            'X-Content-Type-Options: nosniff',
+            'Cache-Control: no-cache="Set-Cookie"',
+        ]
     });
 
     pathRules.push({
