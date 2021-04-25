@@ -84,7 +84,7 @@ for (let slsFunction of slsConfigs.resources) {
             "Content-Security-Policy: frame-ancestors 'self'",
             'Strict-Transport-Security: max-age=31536000; includesubdomains',
             'X-Content-Type-Options: nosniff',
-            'X-Powered-By: Java 8',
+            `X-Powered-By: ${config.albHeaderPoweredBy}`,
             'Cache-Control: no-cache="Set-Cookie"',
         ]
     });
