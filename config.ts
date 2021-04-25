@@ -23,4 +23,4 @@ export const vpcConnectorRange = configPulumi.get("vpcConnectorRange");
 
 export const slsServiceName = configPulumi.get("slsServiceName");
 export const albHttpRoute = configPulumi.getBoolean("albHttpRoute");
-export const albHeaderPoweredBy = configPulumi.getBoolean("albHeaderPoweredBy");
+export const albHeaderPoweredBy = configPulumi.get("albHeaderPoweredBy");
