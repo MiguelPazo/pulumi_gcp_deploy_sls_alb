@@ -102,7 +102,8 @@ for (let slsFunction of slsConfigs.resources) {
 }
 
 
-const albBackend = new gcp.compute.URLMap(`${config.generalPrefix}-alb-backend`, {
+const albBackendHttps = new gcp.compute.URLMap(`${config.generalPrefix}-alb-backend-https`, {
+    name: `${config.generalPrefix}-alb-backend-https`,
     defaultUrlRedirect: {
         hostRedirect: config.targetDomainRedirect,
         httpsRedirect: true,
@@ -123,25 +124,32 @@ const albBackend = new gcp.compute.URLMap(`${config.generalPrefix}-alb-backend`,
     ]
 });
 
-if (config.albHttpRoute) {
-    const httpProxyBackend = new gcp.compute.TargetHttpProxy(`${config.generalPrefix}-alb-backend-proxy-http`, {
-        urlMap: albBackend.selfLink,
-    });
+const albBackendHttp = new gcp.compute.URLMap(`${config.generalPrefix}-alb-backend-http`, {
+    name: `${config.generalPrefix}-alb-backend-http`,
+    defaultUrlRedirect: {
+        hostRedirect: config.targetDomain,
+        httpsRedirect: true,
+        stripQuery: true,
+    }
+});
 
-    new gcp.compute.GlobalForwardingRule(`${config.generalPrefix}-alb-backend-forward-http`, {
-        target: httpProxyBackend.selfLink,
-        ipAddress: externalIpBackend.address,
-        portRange: "80",
-    });
-}
+const httpProxyBackend = new gcp.compute.TargetHttpProxy(`${config.generalPrefix}-alb-backend-proxy-http`, {
+    urlMap: albBackendHttp.selfLink,
+});
+
+new gcp.compute.GlobalForwardingRule(`${config.generalPrefix}-alb-backend-forward-http`, {
+    target: httpProxyBackend.selfLink,
+    ipAddress: externalIpBackend.address,
+    portRange: "80",
+});
 
 const sslPolicyFrontend = new gcp.compute.SSLPolicy(`${config.generalPrefix}-alb-backend-https-policy`, {
     minTlsVersion: 'TLS_1_2',
-    profile: 'COMPATIBLE'
+    profile: 'MODERN'
 });
 
 const httpsProxyBackend = new gcp.compute.TargetHttpsProxy(`${config.generalPrefix}-alb-backend-proxy-https`, {
-    urlMap: albBackend.selfLink,
+    urlMap: albBackendHttps.selfLink,
     sslPolicy: sslPolicyFrontend.selfLink,
     sslCertificates: [
         certificates[config.targetDomain].id,
